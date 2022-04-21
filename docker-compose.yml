@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  poort8.ishare.service:
+    image: ${DOCKER_REGISTRY-}poort8ishareservice
+    build:
+      context: .
+      dockerfile: Poort8.Ishare.Service/Dockerfile
