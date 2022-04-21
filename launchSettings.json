@@ -2,10 +2,15 @@
   "profiles": {
     "Docker Compose": {
       "commandName": "DockerCompose",
+      "composeLaunchAction": "LaunchBrowser",
+      "composeLaunchServiceName": "poort8.ishare.service",
+      "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}/swagger",
       "commandVersion": "1.0",
       "serviceActions": {
         "poort8.ishare.common": "StartWithoutDebugging",
-        "poort8.ishare.service": "StartDebugging"
+        "poort8.ishare.service": "StartDebugging",
+        "mongo-db": "StartWithoutDebugging",
+        "orion": "StartWithoutDebugging"
       }
     }
   }
