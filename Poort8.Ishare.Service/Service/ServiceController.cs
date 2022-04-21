@@ -11,35 +11,37 @@ public class ServiceController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly HttpClient _httpClient;
     private readonly IAuthenticationService _authenticationService;
+    private readonly IPolicyEnforcementPoint _policyEnforcementPoint;
 
     public ServiceController(ILogger<ServiceController> logger,
         IConfiguration configuration,
         IHttpClientFactory httpClientFactory,
-        IAuthenticationService authenticationService)
+        IAuthenticationService authenticationService,
+        IPolicyEnforcementPoint policyEnforcementPoint)
     {
         _logger = logger;
         _configuration = configuration;
 
         _httpClient = httpClientFactory.CreateClient(nameof(ServiceController));
-        _httpClient.BaseAddress = new Uri("http://orion:1026");
 
         _authenticationService = authenticationService;
+        _policyEnforcementPoint = policyEnforcementPoint;
     }
 
     //TODO: Swagger
-    [HttpPost]
-    public async Task<IActionResult> Post(
-        [FromHeader(Name = "Authorization")] string authorization,
-        [FromHeader(Name = "delegation_evidence")] string delegationEvidence,
-        [FromBody] dynamic entity)
+    [HttpGet]
+    public async Task<IActionResult> Get(
+        [FromHeader(Name = "delegation_evidence")] string delegationEvidence)
     {
-        _logger.LogInformation("Received service request with authorization header: {authorization}", authorization);
+        var authorization = Request.Headers.Authorization;
+
+        _logger.LogInformation("Received service GET request with authorization header: {authorization}", authorization);
 
         if (string.IsNullOrEmpty(authorization)) { return new UnauthorizedResult(); }
 
         try
         {
-            _authenticationService.ValidateAccessToken(_configuration["ClientId"], authorization);
+            _authenticationService.ValidateAuthorizationHeader(_configuration["ClientId"], authorization);
         }
         catch (Exception e)
         {
@@ -47,17 +49,28 @@ public class ServiceController : ControllerBase
             return new UnauthorizedObjectResult("Invalid authorization header.");
         }
 
-        //TODO: Handle delegationEvidence
-
-        //TODO: WIP post to context broker
-        var content = JsonContent.Create(entity);
+        _logger.LogInformation("Received service GET request with delegation_evidence header: {delegationEvidence}", delegationEvidence);
         try
         {
-            var test = await _httpClient.PostAsync("/ngsi-ld/v1/entities/", content);
-            return new OkObjectResult(test);
+            var isPermitted = _policyEnforcementPoint.VerifyDelegationTokenPermit(_configuration["AuthorizationRegistryIdentifier"], delegationEvidence);
+            if (!isPermitted) { throw new Exception("VerifyDelegationTokenPermit returned false."); }
         }
         catch (Exception e)
         {
+            _logger.LogInformation("Returning forbidden, invalid delegation evidence: {msg}", e.Message);
+            return new StatusCodeResult(StatusCodes.Status403Forbidden);
+        }
+
+        try
+        {
+            var data = await _httpClient.GetStringAsync(_configuration["BackendUrl"]);
+
+            _logger.LogInformation("Returning data.");
+            return new OkObjectResult(data);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Returning internal server error, could not get data at backend url: {msg}", e.Message);
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
