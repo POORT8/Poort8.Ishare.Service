@@ -1,0 +1,513 @@
+{
+	"info": {
+		"_postman_id": "44e69928-744f-460a-a394-ab6d118754a2",
+		"name": "Sample Service Provider calls",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Service Consumer uses service from Service Provider",
+			"item": [
+				{
+					"name": "0. Service Consumer gets delegation_evidence from Poort8 (for testing only)",
+					"item": [
+						{
+							"name": "Create client assertion (testing only)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set('client_assertion',pm.response.text())"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "alg",
+										"value": "RS256",
+										"type": "text"
+									},
+									{
+										"key": "typ",
+										"value": "JWT",
+										"type": "text"
+									},
+									{
+										"key": "aud",
+										"value": "EU.EORI.NL888888881",
+										"type": "text",
+										"description": "Poort8 ID on iSHARE test"
+									},
+									{
+										"key": "iss",
+										"value": "{{serviceConsumer.EORI}}",
+										"type": "text"
+									},
+									{
+										"key": "x5c",
+										"value": "{{serviceConsumer.IsharePublicKey}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{serviceConsumer.IsharePrivateKey}}"
+								},
+								"url": {
+									"raw": "https://scheme.isharetest.net/testing/generate-authorize-request",
+									"protocol": "https",
+									"host": [
+										"scheme",
+										"isharetest",
+										"net"
+									],
+									"path": [
+										"testing",
+										"generate-authorize-request"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Fetch token",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonBody = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Verify 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Verify response\", function () {\r",
+											"    pm.expect(jsonBody.access_token).to.not.null;\r",
+											"    pm.expect(jsonBody.token_type).to.eql(\"Bearer\");\r",
+											"    pm.expect(jsonBody.expires_in).to.eql(3600);\r",
+											"});\r",
+											"\r",
+											"pm.environment.set(\"access_token\", jsonBody.access_token);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "grant_type",
+											"value": "client_credentials",
+											"type": "text"
+										},
+										{
+											"key": "scope",
+											"value": "iSHARE",
+											"type": "text"
+										},
+										{
+											"key": "client_id",
+											"value": "{{serviceConsumer.EORI}}",
+											"type": "text"
+										},
+										{
+											"key": "client_assertion_type",
+											"value": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+											"type": "text"
+										},
+										{
+											"key": "client_assertion",
+											"value": "{{client_assertion}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "https://api.poort8.nl/ar-preview/ishare/connect/token",
+									"protocol": "https",
+									"host": [
+										"api",
+										"poort8",
+										"nl"
+									],
+									"path": [
+										"ar-preview",
+										"ishare",
+										"connect",
+										"token"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get delegation evidence (Playbook IntegrationTesting) Copy",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"function jwt_decode(jwt) {\r",
+											"    var parts = jwt.split('.'); // header, payload, signature\r",
+											"    return JSON.parse(atob(parts[1]));\r",
+											"}\r",
+											"\r",
+											"let jsonBody = pm.response.json();\r",
+											"let de = jwt_decode(jsonBody.delegation_token);\r",
+											"\r",
+											"pm.test(\"Verify 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Verify Permit\", function () {\r",
+											"    pm.expect(de.delegationEvidence.policySets[0].policies[0].rules[0].effect).to.eql(\"Permit\");\r",
+											"});\r",
+											"\r",
+											"pm.environment.set(\"delegation_evidence\", jsonBody.delegation_token);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\t\"delegationRequest\": {\r\n\t\t\"PolicyIssuer\": \"EU.EORI.NL888888881\",\r\n\t\t\"target\": {\r\n\t\t\t\"accessSubject\": \"EU.EORI.NL888888882\"\r\n\t\t},\r\n\t\t\"policySets\": [{\r\n\t\t\t\"policies\": [{\r\n\t\t\t\t\"target\": {\r\n\t\t\t\t\t\"resource\": {\r\n\t\t\t\t\t\t\"type\": \"poort8.iSHARE.service\",\r\n\t\t\t\t\t\t\"identifiers\": [\"1\"\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t\t\"attributes\": [\r\n\t\t\t\t\t\t\t\"Test\"\r\n\t\t\t\t\t\t]\r\n\t\t\t\t\t},\r\n\t\t\t\t\t\"actions\": [\r\n\t\t\t\t\t\t\"IntegrationTesting.read\"\r\n\t\t\t\t\t],\r\n\t\t\t\t\t\"environment\": {\r\n\t\t\t\t\t\t\"serviceProviders\": [\r\n\t\t\t\t\t\t\t\"{{serviceProvider.EORI}}\"\r\n\t\t\t\t\t\t]\r\n\t\t\t\t\t}\r\n\t\t\t\t},\r\n\t\t\t\t\"rules\": [{\r\n\t\t\t\t\t\"effect\": \"Permit\"\r\n\t\t\t\t}]\r\n\t\t\t}]\r\n\t\t}]\r\n\t}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.poort8.nl/ar-preview/playbook/IntegrationTest/ishare/delegation",
+									"protocol": "https",
+									"host": [
+										"api",
+										"poort8",
+										"nl"
+									],
+									"path": [
+										"ar-preview",
+										"playbook",
+										"IntegrationTest",
+										"ishare",
+										"delegation"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "0. Service Consumer creates client assertion (for testing only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set('client_assertion',pm.response.text())"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "alg",
+								"value": "RS256",
+								"type": "text"
+							},
+							{
+								"key": "typ",
+								"value": "JWT",
+								"type": "text"
+							},
+							{
+								"key": "aud",
+								"value": "{{serviceProvider.EORI}}",
+								"type": "text",
+								"description": "ServiceProvider ID on iSHARE test"
+							},
+							{
+								"key": "iss",
+								"value": "{{serviceConsumer.EORI}}",
+								"type": "text"
+							},
+							{
+								"key": "x5c",
+								"value": "{{serviceConsumer.IsharePublicKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{{serviceConsumer.IsharePrivateKey}}"
+						},
+						"url": {
+							"raw": "https://scheme.isharetest.net/testing/generate-authorize-request",
+							"protocol": "https",
+							"host": [
+								"scheme",
+								"isharetest",
+								"net"
+							],
+							"path": [
+								"testing",
+								"generate-authorize-request"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1. Service Consumer fetches token from Service Provider",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let jsonBody = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Verify 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify response\", function () {\r",
+									"    pm.expect(jsonBody.access_token).to.not.null;\r",
+									"    pm.expect(jsonBody.token_type).to.eql(\"Bearer\");\r",
+									"    pm.expect(jsonBody.expires_in).to.eql(3600);\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"access_token\", jsonBody.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "iSHARE",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{serviceConsumer.EORI}}",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion_type",
+									"value": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion",
+									"value": "{{client_assertion}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{serviceProvider.URL.common}}/token",
+							"host": [
+								"{{serviceProvider.URL.common}}"
+							],
+							"path": [
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Service Consumer uses service from Service Provider",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "delegation_evidence",
+								"value": "{{delegation_evidence}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{{formatToBeDetermined}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serviceProvider.URL.service}}/service",
+							"host": [
+								"{{serviceProvider.URL.service}}"
+							],
+							"path": [
+								"service"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "serviceProvider.EORI",
+			"value": "EU.EORI.NL888888881",
+			"type": "string"
+		},
+		{
+			"key": "serviceProvider.URL.common",
+			"value": "https://poort8-ishare-common.azurewebsites.net/api",
+			"type": "string"
+		},
+		{
+			"key": "serviceProvider.URL.service",
+			"value": "https://poort8-ishare-service.azurewebsites.net/api",
+			"type": "string"
+		},
+		{
+			"key": "serviceConsumer.EORI",
+			"value": "EU.EORI.NL_________",
+			"type": "string"
+		},
+		{
+			"key": "serviceConsumer.IsharePublicKey",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "serviceConsumer.IsharePrivateKey",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
