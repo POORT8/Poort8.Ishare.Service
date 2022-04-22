@@ -1,20 +1,34 @@
-Poort8.Ishare.Service
+[![Actions Status](https://github.com/POORT8/Poort8.Ishare.Common/workflows/Build%20and%20test/badge.svg)](https://github.com/POORT8/Poort8.Ishare.Common/actions)
 
+# Poort8.Ishare.Service
+The project contains the *Service Provider endpoints* of the [iSHARE scheme](https://dev.ishareworks.org/):
 
-# Testing
+ - [Service](https://dev.ishareworks.org/service-provider/service.html)
 
-The Poort8.Ishare.Service container can be tested using a the Postman test collection `Poort8.Ishare.Service.postman_collection.json`. After obtaining an iSHARE test certificate, one can directly try the Poort8 implementation of Poort8.Ishare.Common and Poort8.Ishare.Service.
+ This is an abstract endpoint, that can be implemented multiple times, for each business specific service. 
+ 
+ ## Requirements 
+ - Each `Service` endpoint must be called using an iSHARE `access_token` obtained from the service provider as an authentication method. The token endpoint can be implemented using the repo `https://github.com/POORT8/Poort8.Ishare.Common`.
+ - Optionally, a call to the `Service` can be set to require `delegation_evidence` from an iSHARE authorization registry as an authorization method.
+
+## Getting Started
+
+TBD
+
+## Demo and testing
+In the context of git repos testing is usually referred to as unit/integration testing. Here it means (for the lack of a better term) playing with the endpoint
+
+The Poort8.Ishare.Service container can be tested using the Postman test collection `Poort8.Ishare.Service.postman_collection.json`. After obtaining an iSHARE test certificate, one can directly try the Poort8 implementation of Poort8.Ishare.Common and Poort8.Ishare.Service.
 
 Then, by changing the collection variables, one can use this Postman collection to test your own implementation.
-
 
 ### How does one use it?
 
 1. [Get Postman](https://www.getpostman.com/apps)
 2. Run it. Don't bother signing in if you don't want to, there's a small link on the bottom to skip. This project does not use any of Postman's cloud features.
-3. Click `Import` button in top left and drag `Poort8.Ishare.Service.postman_collection.json there.
+3. Click `Import` button in top left and drag `Poort8.Ishare.Service.postman_collection.json` there.
 4. Open the collection `Sample Service Provider Calls` and go to the tab `Variables`. Replace serviceConsumer.EORI with the EORI number from the iSHARE test certificate in the format `EU.EORI.NL_________`.
-5. Also in the tab `Variables`, add your iSHARE public and private key in the designated variables. This is used in the test collection for obtaining the iSHARE required client assertion. NB. this is not good practice for one's operational implementation. Therefore ONLY do this with test certificates, do not add the private key from any operational certificate. 
+5. Also in the tab `Variables`, add your iSHARE public and private key in the designated variables. In the test collection this is sent to an endpoint from the iSHARE scheme owner to obtain the iSHARE required client assertion. *This means the submitted private key is sent over the internet*. NB. this is not good practice for one's operational implementation. Therefore ONLY do this with test certificates, do not add the private key from any operational certificate. 
 6. Click `Run`
 7. After implementing `Poort8.Ishare.Common` and `Poort8.Ishare.Service`, one can edit the serviceProvider variables to match the details of one's own implementation.
 
