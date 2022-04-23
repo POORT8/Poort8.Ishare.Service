@@ -39,3 +39,7 @@ Postman automatically runs a series of scripts to handle the iSHARE-defined Iden
 - then in step 1. an access_token is obtained from the serviceProvider
 - in step 2. - using both results from 0. and 1. - the service from the serviceProvider is called.
 Automated javastript tests check if the calls are successful
+
+## Acknowledgements
+
+This package was developed with partial funding from the Dutch Topsector Logistics.
