@@ -35,7 +35,7 @@ Then, by changing the collection variables, one can use this Postman collection 
 ### How does it work?
 
 Postman automatically runs a series of scripts to handle the iSHARE-defined Identification and Authorization procedures:
-- as step 0., a sample Delegation Evidence is obtained from the Poort8 authorization registry. This sample allows the serviceConsumer from step 4. to obtain the data on behalf of dummy organisation EU.EORI.NL888888882, who is allowed to `read` the attribute `test` of item `1` in `poort8.iSHARE.service` for `IntegrationTesting`.
+- as step 0., a sample Delegation Evidence is obtained from the Poort8 authorization registry. This sample allows the serviceConsumer from step 4. to obtain the data on behalf of dummy organisation `EU.EORI.NL888888882`, who is allowed to `read` the attribute `test` of item `1` in `poort8.iSHARE.service` for `IntegrationTesting`.
 - then in step 1. an access_token is obtained from the serviceProvider
 - in step 2. - using both results from 0. and 1. - the service from the serviceProvider is called.
 Automated javastript tests check if the calls are successful
