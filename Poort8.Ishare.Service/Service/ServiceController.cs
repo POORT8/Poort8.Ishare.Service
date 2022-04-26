@@ -45,6 +45,9 @@ public class ServiceController : ControllerBase
         {
             //NOTE: For now only json bodies
             var body = JsonContent.Create(requestBody);
+
+            _logger.LogInformation("Sending post request to backend service with body: {body}", (string)JsonSerializer.Serialize(requestBody));
+
             var url = $"{_configuration["BackendUrl"]}";
             var response = await _httpClient.PostAsync(url, body);
 
@@ -58,7 +61,7 @@ public class ServiceController : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id?}")]
     public async Task<IActionResult> Read(
         string id,
         [FromHeader(Name = "delegation_evidence")] string delegationEvidence)
@@ -74,7 +77,7 @@ public class ServiceController : ControllerBase
             var data = await _httpClient.GetStringAsync(url);
             var jsonData = JsonDocument.Parse(data);
 
-            _logger.LogInformation("Returning data: {data}", jsonData);
+            _logger.LogInformation("Returning data: {data}", JsonSerializer.Serialize(jsonData));
             return new OkObjectResult(jsonData);
         }
         catch (Exception e)
@@ -86,7 +89,7 @@ public class ServiceController : ControllerBase
 
     private IActionResult? HandleAuthenticationAndAuthorization(string authorization, string delegationEvidence)
     {
-        _logger.LogInformation("Received service GET request with authorization header: {authorization}", authorization);
+        _logger.LogDebug("Received service GET request with authorization header: {authorization}", authorization);
 
         if (string.IsNullOrEmpty(authorization)) { return new UnauthorizedResult(); }
 
@@ -100,7 +103,7 @@ public class ServiceController : ControllerBase
             return new UnauthorizedObjectResult("Invalid authorization header.");
         }
 
-        _logger.LogInformation("Received service GET request with delegation_evidence header: {delegationEvidence}", delegationEvidence);
+        _logger.LogDebug("Received service GET request with delegation_evidence header: {delegationEvidence}", delegationEvidence);
         try
         {
             var isPermitted = _policyEnforcementPoint.VerifyDelegationTokenPermit(_configuration["AuthorizationRegistryIdentifier"], delegationEvidence);
@@ -112,6 +115,7 @@ public class ServiceController : ControllerBase
             return new StatusCodeResult(StatusCodes.Status403Forbidden);
         }
 
+        _logger.LogInformation("Valid authentication and authorization.");
         return null;
     }
 }
