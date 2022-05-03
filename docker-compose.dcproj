@@ -9,6 +9,7 @@
     <DockerServiceName>poort8.ishare.service</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="docker-compose.context-broker.override.yml" />
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
