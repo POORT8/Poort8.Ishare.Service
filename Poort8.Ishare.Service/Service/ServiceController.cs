@@ -38,8 +38,10 @@ public class ServiceController : ControllerBase
     {
         var authorization = Request.Headers.Authorization;
 
+        _logger.LogDebug("Received service POST request with authorization header: {authorization}", authorization);
+
         var errorResponse = HandleAuthenticationAndAuthorization(authorization, delegationEvidence);
-        if (errorResponse != null) { return errorResponse; }
+        if (errorResponse is not null) { return errorResponse; }
 
         try
         {
@@ -63,13 +65,15 @@ public class ServiceController : ControllerBase
 
     [HttpGet("{id?}")]
     public async Task<IActionResult> Read(
-        string id,
+        string? id,
         [FromHeader(Name = "delegation_evidence")] string delegationEvidence)
     {
         var authorization = Request.Headers.Authorization;
 
+        _logger.LogDebug("Received service GET request with authorization header: {authorization}", authorization);
+
         var errorResponse = HandleAuthenticationAndAuthorization(authorization, delegationEvidence);
-        if (errorResponse != null) { return errorResponse; }
+        if (errorResponse is not null) { return errorResponse; }
 
         try
         {
@@ -89,8 +93,6 @@ public class ServiceController : ControllerBase
 
     private IActionResult? HandleAuthenticationAndAuthorization(string authorization, string delegationEvidence)
     {
-        _logger.LogDebug("Received service GET request with authorization header: {authorization}", authorization);
-
         if (string.IsNullOrEmpty(authorization)) { return new UnauthorizedResult(); }
 
         try
@@ -103,7 +105,8 @@ public class ServiceController : ControllerBase
             return new UnauthorizedObjectResult("Invalid authorization header.");
         }
 
-        _logger.LogDebug("Received service GET request with delegation_evidence header: {delegationEvidence}", delegationEvidence);
+        _logger.LogDebug("Received delegation_evidence header: {delegationEvidence}", delegationEvidence);
+
         try
         {
             var isPermitted = _policyEnforcementPoint.VerifyDelegationTokenPermit(_configuration["AuthorizationRegistryIdentifier"], delegationEvidence);
