@@ -91,6 +91,45 @@ public class ServiceController : ControllerBase
         }
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(
+        string id,
+        [FromHeader(Name = "delegation_evidence")] string delegationEvidence,
+        [FromBody] dynamic requestBody)
+    {
+        var authorization = Request.Headers.Authorization;
+
+        _logger.LogDebug("Received service PUT request with authorization header: {authorization}", authorization);
+
+        var errorResponse = HandleAuthenticationAndAuthorization(authorization, delegationEvidence);
+        if (errorResponse is not null) { return errorResponse; }
+
+        try
+        {
+            //TODO: Use backend PUT (quick fix for FIWARE Context-LD Broker)
+            var url = $"{_configuration["BackendUrl"]}/{id}";
+            var response = await _httpClient.DeleteAsync(url);
+
+            _logger.LogInformation("Received status code {statusCode} on delete.", (int)response.StatusCode);
+
+            //NOTE: For now only json bodies
+            var body = JsonContent.Create(requestBody);
+
+            _logger.LogInformation("Sending post request to backend service with body: {body}", (string)JsonSerializer.Serialize(requestBody));
+
+            url = $"{_configuration["BackendUrl"]}";
+            response = await _httpClient.PostAsync(url, body);
+
+            _logger.LogInformation("Returning status code: {statusCode}", (int)response.StatusCode);
+            return new StatusCodeResult((int)response.StatusCode);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Returning internal server error, could not update data at backend url: {msg}", e.Message);
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
     private IActionResult? HandleAuthenticationAndAuthorization(string authorization, string delegationEvidence)
     {
         if (string.IsNullOrEmpty(authorization)) { return new UnauthorizedResult(); }
