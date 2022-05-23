@@ -34,7 +34,8 @@ Then, by changing the collection variables, one can use this Postman collection 
 4. Open the collection `Sample Service Provider Calls` and go to the tab `Variables`. Replace serviceConsumer.EORI with the EORI number from the iSHARE test certificate in the format `EU.EORI.NL_________`.
 5. Also in the tab `Variables`, add your iSHARE public and private key in the designated variables. 
   - NB. In the test collection this is sent to an endpoint from the iSHARE scheme owner to obtain the iSHARE required client assertion. *This means the submitted private key is sent over the internet*. This is not good practice for one's operational implementation. Therefore ONLY do this with test certificates, do not add the private key from any operational certificate. 
-  - NB2. Retrieving public and private keys from the test certificate can be cumbersome. Use the public key _without_ linebreaks and _without_ begin and end:
+  - NB2. Retrieving public and private keys from the test certificate can be cumbersome. The iSHARE foundation provides a code snippet to support this process here: https://github.com/iSHAREScheme/code-snippets/tree/master/Cert_Key_Extractor.
+  - Use the public key _without_ linebreaks and _without_ begin and end:
 ```
 MIID****
 ```
