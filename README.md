@@ -10,7 +10,6 @@ The project contains the *Service Provider endpoints* of the [iSHARE scheme](htt
  ## Requirements 
  - System requirements
    - Docker
-   - .NET Core SDK or .NET Core Runtime
  - Each `Service` endpoint must be called using an iSHARE `access_token` obtained from the service provider as an authentication method. The token endpoint can be implemented using the repo `https://github.com/POORT8/Poort8.Ishare.Common`.
  - Both `https://github.com/POORT8/Poort8.Ishare.Common` and `https://github.com/POORT8/Poort8.Ishare.Service` have a dependency on the nuget package `Poort8.Ishare.Core`, but require different versions. Implement both containers using Docker Compose to keep these dependecies for each container in tact.
  - Optionally, a call to the `Service` can be set to require `delegation_evidence` from an iSHARE authorization registry as an authorization method.
