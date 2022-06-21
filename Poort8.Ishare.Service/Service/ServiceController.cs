@@ -87,8 +87,17 @@ public class ServiceController : ControllerBase
         try
         {
             var url = $"{_configuration["BackendUrl"]}/{id}";
-            var data = await _httpClient.GetStringAsync(url);
-            var jsonData = JsonDocument.Parse(data);
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            //NOTE: Add Link header (for FIWARE Context-LD Broker)
+            if (Request.Headers.ContainsKey("Link"))
+            {
+                Request.Headers.TryGetValue("Link", out StringValues linkHeader);
+                request.Headers.TryAddWithoutValidation("Link", linkHeader[0]);
+            }
+
+            var data = await _httpClient.SendAsync(request);
+            var jsonData = JsonDocument.Parse(await data.Content.ReadAsStringAsync());
 
             _logger.LogInformation("Returning data: {data}", JsonSerializer.Serialize(jsonData));
             return new OkObjectResult(jsonData);
@@ -121,13 +130,21 @@ public class ServiceController : ControllerBase
 
             _logger.LogInformation("Received status code {statusCode} on delete.", (int)response.StatusCode);
 
-            //NOTE: For now only json bodies
-            var body = JsonContent.Create(requestBody);
-
             _logger.LogInformation("Sending post request to backend service with body: {body}", (string)JsonSerializer.Serialize(requestBody));
 
             url = $"{_configuration["BackendUrl"]}";
-            response = await _httpClient.PostAsync(url, body);
+            var request = new HttpRequestMessage(HttpMethod.Post, url);
+
+            //NOTE: Add Link header (for FIWARE Context-LD Broker)
+            if (Request.Headers.ContainsKey("Link"))
+            {
+                Request.Headers.TryGetValue("Link", out StringValues linkHeader);
+                request.Headers.TryAddWithoutValidation("Link", linkHeader[0]);
+            }
+
+            request.Content = JsonContent.Create(requestBody); //NOTE: For now only json bodies
+
+            response = await _httpClient.SendAsync(request);
 
             _logger.LogInformation("Returning status code: {statusCode}", (int)response.StatusCode);
             return new StatusCodeResult((int)response.StatusCode);
