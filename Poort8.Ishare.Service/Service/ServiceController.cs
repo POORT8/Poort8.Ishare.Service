@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Poort8.Ishare.Core;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Poort8.Ishare.Service.Service;
@@ -94,6 +95,7 @@ public class ServiceController : ControllerBase
             {
                 Request.Headers.TryGetValue("Link", out StringValues linkHeader);
                 request.Headers.TryAddWithoutValidation("Link", linkHeader[0]);
+                request.Headers.TryAddWithoutValidation("Accept", "application/ld+json;masked=false");
             }
 
             var data = await _httpClient.SendAsync(request);
