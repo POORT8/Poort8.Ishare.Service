@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Poort8.Ishare.Core;
+using Poort8.Ishare.Core.Models;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 
 namespace Poort8.Ishare.Service.Service;
@@ -86,6 +88,9 @@ public class ServiceController : ControllerBase
 
         try
         {
+            errorResponse = VerifyResource(delegationEvidence, id);
+            if (errorResponse is not null) { return errorResponse; }
+
             var url = $"{_configuration["BackendUrl"]}/{id}{Request.QueryString}";
             var data = await _httpClient.GetStringAsync(url);
             var jsonData = JsonDocument.Parse(data);
@@ -167,6 +172,33 @@ public class ServiceController : ControllerBase
         }
 
         _logger.LogInformation("Valid authentication and authorization.");
+        return null;
+    }
+
+    private IActionResult? VerifyResource(string delegationEvidence, string entity)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(delegationEvidence);
+        jwtToken.Payload.TryGetValue("delegationEvidence", out object? delegationEvidenceClaim);
+
+#pragma warning disable CS8604 // Possible null reference argument.
+        var delegationEvidenceObject = JsonSerializer.Deserialize<DelegationEvidence>(delegationEvidenceClaim.ToString());
+#pragma warning restore CS8604 // Possible null reference argument.
+
+        var resourceIdentifier = delegationEvidenceObject?.PolicySets?[0].Policies?[0].Target?.Resource?.Identifiers?.FirstOrDefault();
+        var type = delegationEvidenceObject?.PolicySets?[0].Policies?[0].Target?.Resource?.Type;
+
+        var entityCheck = $"urn:ngsi-ld:{type}:{resourceIdentifier}";
+
+        _logger.LogInformation("Checking delegation evidence entity {entityCheck} against the path entity {entity}", entityCheck, entity);
+
+        if (!string.Equals(entityCheck, entity, StringComparison.InvariantCultureIgnoreCase))
+        {
+            _logger.LogInformation("Returning forbidden, invalid resource");
+            return new StatusCodeResult(StatusCodes.Status403Forbidden);
+        }
+
+        _logger.LogInformation("Valid resource.");
         return null;
     }
 }
