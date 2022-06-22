@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace Poort8.Ishare.Service.Service;
 
-[Route("/ngsi-ld/v1/entities/")]
+[Route("/ngsi-ld/v1/")]
 [ApiController]
 public class ServiceController : ControllerBase
 {
@@ -34,14 +34,21 @@ public class ServiceController : ControllerBase
     }
 
     //TODO: Swagger
-    [HttpPost]
+    [HttpPost("{operation}")]
     public async Task<IActionResult> Create(
+        string? operation,
         [FromHeader(Name = "delegation_evidence")] string delegationEvidence,
         [FromBody] dynamic requestBody)
     {
         var authorization = Request.Headers.Authorization;
 
         _logger.LogDebug("Received service POST request with authorization header: {authorization}", authorization);
+
+        if (!string.Equals(operation, "entities", StringComparison.InvariantCultureIgnoreCase))
+        {
+            _logger.LogInformation("Returning forbidden, invalid opeation: {operation}", operation);
+            return new StatusCodeResult(StatusCodes.Status403Forbidden);
+        }
 
         var errorResponse = HandleAuthenticationAndAuthorization(authorization, delegationEvidence);
         if (errorResponse is not null) { return errorResponse; }
@@ -74,14 +81,21 @@ public class ServiceController : ControllerBase
         }
     }
 
-    [HttpGet("{id?}")]
+    [HttpGet("{operation}/{id?}")]
     public async Task<IActionResult> Read(
+        string? operation,
         string? id,
         [FromHeader(Name = "delegation_evidence")] string delegationEvidence)
     {
         var authorization = Request.Headers.Authorization;
 
         _logger.LogDebug("Received service GET request with authorization header: {authorization}", authorization);
+
+        if (!string.Equals(operation, "entities", StringComparison.InvariantCultureIgnoreCase))
+        {
+            _logger.LogInformation("Returning forbidden, invalid opeation: {operation}", operation);
+            return new StatusCodeResult(StatusCodes.Status403Forbidden);
+        }
 
         var errorResponse = HandleAuthenticationAndAuthorization(authorization, delegationEvidence);
         if (errorResponse is not null) { return errorResponse; }
@@ -105,8 +119,9 @@ public class ServiceController : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{operation}/{id}")]
     public async Task<IActionResult> Update(
+        string? operation,
         string id,
         [FromHeader(Name = "delegation_evidence")] string delegationEvidence,
         [FromBody] dynamic requestBody)
@@ -114,6 +129,12 @@ public class ServiceController : ControllerBase
         var authorization = Request.Headers.Authorization;
 
         _logger.LogDebug("Received service PUT request with authorization header: {authorization}", authorization);
+
+        if (!string.Equals(operation, "entities", StringComparison.InvariantCultureIgnoreCase))
+        {
+            _logger.LogInformation("Returning forbidden, invalid opeation: {operation}", operation);
+            return new StatusCodeResult(StatusCodes.Status403Forbidden);
+        }
 
         var errorResponse = HandleAuthenticationAndAuthorization(authorization, delegationEvidence);
         if (errorResponse is not null) { return errorResponse; }
