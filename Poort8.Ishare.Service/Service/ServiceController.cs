@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Poort8.Ishare.Service.Service;
 
-[Route("api/[controller]")]
+[Route("/ngsi-ld/v1/entities/")]
 [ApiController]
 public class ServiceController : ControllerBase
 {
@@ -86,7 +86,7 @@ public class ServiceController : ControllerBase
 
         try
         {
-            var url = $"{_configuration["BackendUrl"]}/{id}";
+            var url = $"{_configuration["BackendUrl"]}/{id}{Request.QueryString}";
             var data = await _httpClient.GetStringAsync(url);
             var jsonData = JsonDocument.Parse(data);
 
