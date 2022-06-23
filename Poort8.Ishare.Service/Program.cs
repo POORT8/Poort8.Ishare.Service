@@ -1,5 +1,6 @@
 using Microsoft.OpenApi.Models;
 using Poort8.Ishare.Core;
+using Poort8.Ishare.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 
 builder.Services.AddIshareCoreServices();
+builder.Services.AddSingleton<IAuthService, AuthService>();
 
 builder.Services.AddSwaggerGen(options =>
 {
