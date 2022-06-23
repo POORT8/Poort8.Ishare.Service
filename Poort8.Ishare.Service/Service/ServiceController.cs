@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Poort8.Ishare.Core;
-using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Poort8.Ishare.Service.Service;
