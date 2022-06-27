@@ -49,14 +49,13 @@ public class ServiceController : ControllerBase
 
             var url = $"{_configuration["BackendUrl"]}";
             var request = new HttpRequestMessage(HttpMethod.Post, url);
-            request.Headers.TryAddWithoutValidation("serviceConsumerId", accessTokenAud);
+            request.Headers.TryAddWithoutValidation("service_consumer_id", accessTokenAud);
+            request.Headers.TryAddWithoutValidation("delegation_evidence", delegationEvidence);
 
-            if (_configuration.GetValue<bool>("HandleDelegationEvidence"))
+            if (_configuration.GetValue<bool>("VerifyDelegationEvidence"))
             {
                 errorResponse = HandleAuthorization(delegationEvidence!, accessTokenAud!);
                 if (errorResponse is not null) { return errorResponse; }
-
-                request.Headers.TryAddWithoutValidation("delegation_evidence", delegationEvidence);
             }
 
             //NOTE: Add Link header (for FIWARE Context-LD Broker)
@@ -96,14 +95,13 @@ public class ServiceController : ControllerBase
         {
             var url = $"{_configuration["BackendUrl"]}/{id}";
             var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.TryAddWithoutValidation("serviceConsumerId", accessTokenAud);
+            request.Headers.TryAddWithoutValidation("service_consumer_id", accessTokenAud);
+            request.Headers.TryAddWithoutValidation("delegation_evidence", delegationEvidence);
 
-            if (_configuration.GetValue<bool>("HandleDelegationEvidence"))
+            if (_configuration.GetValue<bool>("VerifyDelegationEvidence"))
             {
                 errorResponse = HandleAuthorization(delegationEvidence!, accessTokenAud!);
                 if (errorResponse is not null) { return errorResponse; }
-
-                request.Headers.TryAddWithoutValidation("delegation_evidence", delegationEvidence);
             }
 
             //NOTE: Add Link and Accept header (for FIWARE Context-LD Broker)
@@ -145,14 +143,13 @@ public class ServiceController : ControllerBase
             //TODO: Use backend PUT (quick fix for FIWARE Context-LD Broker)
             var url = $"{_configuration["BackendUrl"]}/{id}";
             var request = new HttpRequestMessage(HttpMethod.Delete, url);
-            request.Headers.TryAddWithoutValidation("serviceConsumerId", accessTokenAud);
+            request.Headers.TryAddWithoutValidation("service_consumer_id", accessTokenAud);
+            request.Headers.TryAddWithoutValidation("delegation_evidence", delegationEvidence);
 
-            if (_configuration.GetValue<bool>("HandleDelegationEvidence"))
+            if (_configuration.GetValue<bool>("VerifyDelegationEvidence"))
             {
                 errorResponse = HandleAuthorization(delegationEvidence!, accessTokenAud!);
                 if (errorResponse is not null) { return errorResponse; }
-
-                request.Headers.TryAddWithoutValidation("delegation_evidence", delegationEvidence);
             }
 
             var response = await _httpClient.SendAsync(request);
@@ -162,12 +159,8 @@ public class ServiceController : ControllerBase
 
             url = $"{_configuration["BackendUrl"]}";
             request = new HttpRequestMessage(HttpMethod.Post, url);
-            request.Headers.TryAddWithoutValidation("serviceConsumerId", accessTokenAud);
-
-            if (_configuration.GetValue<bool>("HandleDelegationEvidence"))
-            {
-                request.Headers.TryAddWithoutValidation("delegation_evidence", delegationEvidence);
-            }
+            request.Headers.TryAddWithoutValidation("service_consumer_id", accessTokenAud);
+            request.Headers.TryAddWithoutValidation("delegation_evidence", delegationEvidence);
 
             //NOTE: Add Link header (for FIWARE Context-LD Broker)
             if (Request.Headers.ContainsKey("Link"))
