@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Poort8.Ishare.Core;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Poort8.Ishare.Service;
 
@@ -40,7 +41,15 @@ public class AuthService : IAuthService
 
         try
         {
-            var isPermitted = _policyEnforcementPoint.VerifyDelegationTokenPermit(_configuration["AuthorizationRegistryIdentifier"], delegationEvidence);
+            var handler = new JwtSecurityTokenHandler();
+            var accessToken = handler.ReadJwtToken(authorization);
+
+            var isPermitted = _policyEnforcementPoint.VerifyDelegationTokenPermit(
+                _configuration["AuthorizationRegistryIdentifier"],
+                delegationEvidence,
+                _configuration["Playbook"],
+                _configuration["MinimalPlaybookVersion"],
+                accessToken.Audiences.First()); //TODO: Design generic way to verify the resource
             if (!isPermitted) { throw new Exception("VerifyDelegationTokenPermit returned false."); }
         }
         catch (Exception e)
