@@ -8,7 +8,10 @@ The project contains the *Service Provider endpoints* of the [iSHARE scheme](htt
  This is an abstract endpoint, that can be implemented multiple times, for each business specific service. 
  
  ## Requirements 
+ - System requirements
+   - Docker
  - Each `Service` endpoint must be called using an iSHARE `access_token` obtained from the service provider as an authentication method. The token endpoint can be implemented using the repo `https://github.com/POORT8/Poort8.Ishare.Common`.
+ - Both `https://github.com/POORT8/Poort8.Ishare.Common` and `https://github.com/POORT8/Poort8.Ishare.Service` have a dependency on the nuget package `Poort8.Ishare.Core`, but require different versions. Implement both containers using Docker Compose to keep these dependecies for each container in tact.
  - Optionally, a call to the `Service` can be set to require `delegation_evidence` from an iSHARE authorization registry as an authorization method.
 
 ## Getting Started
@@ -28,9 +31,22 @@ Then, by changing the collection variables, one can use this Postman collection 
 2. Run it. Don't bother signing in if you don't want to, there's a small link on the bottom to skip. This project does not use any of Postman's cloud features.
 3. Click `Import` button in top left and drag `Poort8.Ishare.Service.postman_collection.json` there.
 4. Open the collection `Sample Service Provider Calls` and go to the tab `Variables`. Replace serviceConsumer.EORI with the EORI number from the iSHARE test certificate in the format `EU.EORI.NL_________`.
-5. Also in the tab `Variables`, add your iSHARE public and private key in the designated variables. In the test collection this is sent to an endpoint from the iSHARE scheme owner to obtain the iSHARE required client assertion. *This means the submitted private key is sent over the internet*. NB. this is not good practice for one's operational implementation. Therefore ONLY do this with test certificates, do not add the private key from any operational certificate. 
-6. Click `Run`
-7. After implementing `Poort8.Ishare.Common` and `Poort8.Ishare.Service`, one can edit the serviceProvider variables to match the details of one's own implementation.
+5. Also in the tab `Variables`, add your iSHARE public and private key in the designated variables. 
+  - NB. In the test collection this is sent to an endpoint from the iSHARE scheme owner to obtain the iSHARE required client assertion. *This means the submitted private key is sent over the internet*. This is not good practice for one's operational implementation. Therefore ONLY do this with test certificates, do not add the private key from any operational certificate. 
+  - NB2. Retrieving public and private keys from the test certificate can be cumbersome. The iSHARE foundation provides a code snippet to support this process here: https://github.com/iSHAREScheme/code-snippets/tree/master/Cert_Key_Extractor.
+  - Use the public key _without_ linebreaks and _without_ begin and end:
+```
+MIID****
+```
+  - Use the private key _exactly_ in this format, including begin, line breaks and end:
+```
+-----BEGIN PRIVATE KEY----- 
+MIIE***** 
+-----END PRIVATE KEY-----
+```
+
+7. Click `Run`
+8. After implementing `Poort8.Ishare.Common` and `Poort8.Ishare.Service`, one can edit the serviceProvider variables to match the details of one's own implementation.
 
 ### How does it work?
 
