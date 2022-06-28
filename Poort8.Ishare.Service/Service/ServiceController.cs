@@ -194,7 +194,7 @@ public class ServiceController : ControllerBase
         try
         {
             var handler = new JwtSecurityTokenHandler();
-            var accessToken = handler.ReadJwtToken(authorization);
+            var accessToken = handler.ReadJwtToken(authorization.Replace("Bearer ", ""));
             accessTokenAud = accessToken.Audiences.First();
 
             _logger.LogInformation("Service called by accessTokenAud: {accessTokenAud}", accessTokenAud);
