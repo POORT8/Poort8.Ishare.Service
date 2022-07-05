@@ -74,6 +74,11 @@ public class ServiceController : ControllerBase
             _logger.LogInformation("Returning status code: {statusCode}", (int)response.StatusCode);
             return new StatusCodeResult((int)response.StatusCode);
         }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError("Recieved error status {statusCode} from backend url: {msg}", e.StatusCode, e.Message);
+            return new StatusCodeResult((int)e.StatusCode);
+        }
         catch (Exception e)
         {
             _logger.LogError("Returning internal server error, could not post data to backend url: {msg}", e.Message);
@@ -111,6 +116,11 @@ public class ServiceController : ControllerBase
 
             _logger.LogInformation("Returning data: {data}", JsonSerializer.Serialize(jsonData));
             return new OkObjectResult(jsonData);
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError("Recieved error status {statusCode} from backend url: {msg}", e.StatusCode, e.Message);
+            return new StatusCodeResult((int)e.StatusCode);
         }
         catch (Exception e)
         {
@@ -157,6 +167,11 @@ public class ServiceController : ControllerBase
 
             _logger.LogInformation("Returning status code: {statusCode}", (int)response.StatusCode);
             return new StatusCodeResult((int)response.StatusCode);
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError("Recieved error status {statusCode} from backend url: {msg}", e.StatusCode, e.Message);
+            return new StatusCodeResult((int)e.StatusCode);
         }
         catch (Exception e)
         {
