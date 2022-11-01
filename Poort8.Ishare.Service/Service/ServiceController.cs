@@ -222,8 +222,6 @@ public class ServiceController : ControllerBase
             var isPermitted = _policyEnforcementPoint.VerifyDelegationTokenPermit(
                 _configuration["AuthorizationRegistryIdentifier"],
                 delegationEvidence,
-                _configuration["Playbook"],
-                _configuration["MinimalPlaybookVersion"],
                 accessTokenAud);
             if (!isPermitted) { throw new Exception("VerifyDelegationTokenPermit returned false."); }
         }
