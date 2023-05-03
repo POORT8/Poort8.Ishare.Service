@@ -38,9 +38,9 @@ public class ServiceController : ControllerBase
     {
         var authorization = Request.Headers.Authorization;
 
-        _logger.LogDebug("Received service POST request with authorization header: {authorization}", authorization);
+        _logger.LogDebug("Received service POST request with authorization header: {authorization}", authorization!);
 
-        var errorResponse = HandleAuthentication(authorization, out string? accessTokenAud);
+        var errorResponse = HandleAuthentication(authorization!, out string? accessTokenAud);
         if (errorResponse is not null) { return errorResponse; }
 
         try
@@ -86,9 +86,9 @@ public class ServiceController : ControllerBase
     {
         var authorization = Request.Headers.Authorization;
 
-        _logger.LogDebug("Received service GET request with authorization header: {authorization}", authorization);
+        _logger.LogDebug("Received service GET request with authorization header: {authorization}", authorization!);
 
-        var errorResponse = HandleAuthentication(authorization, out string? accessTokenAud);
+        var errorResponse = HandleAuthentication(authorization!, out string? accessTokenAud);
         if (errorResponse is not null) { return errorResponse; }
 
         try
@@ -133,9 +133,9 @@ public class ServiceController : ControllerBase
     {
         var authorization = Request.Headers.Authorization;
 
-        _logger.LogDebug("Received service PUT request with authorization header: {authorization}", authorization);
+        _logger.LogDebug("Received service PUT request with authorization header: {authorization}", authorization!);
 
-        var errorResponse = HandleAuthentication(authorization, out string? accessTokenAud);
+        var errorResponse = HandleAuthentication(authorization!, out string? accessTokenAud);
         if (errorResponse is not null) { return errorResponse; }
 
         try
@@ -199,7 +199,7 @@ public class ServiceController : ControllerBase
 
             _logger.LogInformation("Service called by accessTokenAud: {accessTokenAud}", accessTokenAud);
 
-            _authenticationService.ValidateAuthorizationHeader(_configuration["ClientId"], authorization);
+            _authenticationService.ValidateAuthorizationHeader(_configuration["ClientId"]!, authorization);
         }
         catch (Exception e)
         {
@@ -220,7 +220,7 @@ public class ServiceController : ControllerBase
 
             //TODO: Design generic way to verify the resource
             var isPermitted = _policyEnforcementPoint.VerifyDelegationTokenPermit(
-                _configuration["AuthorizationRegistryIdentifier"],
+                _configuration["AuthorizationRegistryIdentifier"]!,
                 delegationEvidence,
                 accessTokenAud);
             if (!isPermitted) { throw new Exception("VerifyDelegationTokenPermit returned false."); }
