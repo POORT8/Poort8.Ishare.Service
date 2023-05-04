@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Microsoft.IdentityModel.Tokens;
 using Poort8.Ishare.Core;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
@@ -38,9 +39,9 @@ public class ServiceController : ControllerBase
     {
         var authorization = Request.Headers.Authorization;
 
-        _logger.LogDebug("Received service POST request with authorization header: {authorization}", authorization!);
+        _logger.LogDebug("Received service POST request with authorization header: {authorization}", authorization.IsNullOrEmpty() ? "null" : authorization);
 
-        var errorResponse = HandleAuthentication(authorization!, out string? accessTokenAud);
+        var errorResponse = HandleAuthentication(authorization!, out string accessTokenAud);
         if (errorResponse is not null) { return errorResponse; }
 
         try
@@ -54,7 +55,7 @@ public class ServiceController : ControllerBase
 
             if (_configuration.GetValue<bool>("VerifyDelegationEvidence"))
             {
-                errorResponse = HandleAuthorization(delegationEvidence!, accessTokenAud!);
+                errorResponse = HandleAuthorization(delegationEvidence!, accessTokenAud);
                 if (errorResponse is not null) { return errorResponse; }
             }
 
@@ -86,9 +87,9 @@ public class ServiceController : ControllerBase
     {
         var authorization = Request.Headers.Authorization;
 
-        _logger.LogDebug("Received service GET request with authorization header: {authorization}", authorization!);
+        _logger.LogDebug("Received service GET request with authorization header: {authorization}", authorization.IsNullOrEmpty() ? "null" : authorization);
 
-        var errorResponse = HandleAuthentication(authorization!, out string? accessTokenAud);
+        var errorResponse = HandleAuthentication(authorization!, out string accessTokenAud);
         if (errorResponse is not null) { return errorResponse; }
 
         try
@@ -100,7 +101,7 @@ public class ServiceController : ControllerBase
 
             if (_configuration.GetValue<bool>("VerifyDelegationEvidence"))
             {
-                errorResponse = HandleAuthorization(delegationEvidence!, accessTokenAud!);
+                errorResponse = HandleAuthorization(delegationEvidence!, accessTokenAud);
                 if (errorResponse is not null) { return errorResponse; }
             }
 
@@ -133,9 +134,9 @@ public class ServiceController : ControllerBase
     {
         var authorization = Request.Headers.Authorization;
 
-        _logger.LogDebug("Received service PUT request with authorization header: {authorization}", authorization!);
+        _logger.LogDebug("Received service PUT request with authorization header: {authorization}", authorization.IsNullOrEmpty() ? "null" : authorization);
 
-        var errorResponse = HandleAuthentication(authorization!, out string? accessTokenAud);
+        var errorResponse = HandleAuthentication(authorization!, out string accessTokenAud);
         if (errorResponse is not null) { return errorResponse; }
 
         try
@@ -148,7 +149,7 @@ public class ServiceController : ControllerBase
 
             if (_configuration.GetValue<bool>("VerifyDelegationEvidence"))
             {
-                errorResponse = HandleAuthorization(delegationEvidence!, accessTokenAud!);
+                errorResponse = HandleAuthorization(delegationEvidence!, accessTokenAud);
                 if (errorResponse is not null) { return errorResponse; }
             }
 
@@ -183,11 +184,11 @@ public class ServiceController : ControllerBase
         }
     }
 
-    private IActionResult? HandleAuthentication(string authorization, out string? accessTokenAud)
+    private IActionResult? HandleAuthentication(string authorization, out string accessTokenAud)
     {
         if (string.IsNullOrEmpty(authorization))
         {
-            accessTokenAud = null;
+            accessTokenAud = string.Empty;
             return new UnauthorizedResult(); 
         }
 
@@ -203,7 +204,7 @@ public class ServiceController : ControllerBase
         }
         catch (Exception e)
         {
-            accessTokenAud = null;
+            accessTokenAud = string.Empty;
             _logger.LogWarning("Returning bad request: invalid authorization header. {msg}", e.Message);
             return new UnauthorizedObjectResult("Invalid authorization header.");
         }
