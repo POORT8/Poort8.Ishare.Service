@@ -41,7 +41,7 @@ public class ServiceController : ControllerBase
 
         _logger.LogDebug("Received service POST request with authorization header: {authorization}", authorization.IsNullOrEmpty() ? "null" : authorization);
 
-        var errorResponse = HandleAuthentication(authorization!, out string accessTokenAud);
+        var errorResponse = HandleAuthentication(authorization, out string accessTokenAud);
         if (errorResponse is not null) { return errorResponse; }
 
         try
@@ -89,7 +89,7 @@ public class ServiceController : ControllerBase
 
         _logger.LogDebug("Received service GET request with authorization header: {authorization}", authorization.IsNullOrEmpty() ? "null" : authorization);
 
-        var errorResponse = HandleAuthentication(authorization!, out string accessTokenAud);
+        var errorResponse = HandleAuthentication(authorization, out string accessTokenAud);
         if (errorResponse is not null) { return errorResponse; }
 
         try
@@ -136,7 +136,7 @@ public class ServiceController : ControllerBase
 
         _logger.LogDebug("Received service PUT request with authorization header: {authorization}", authorization.IsNullOrEmpty() ? "null" : authorization);
 
-        var errorResponse = HandleAuthentication(authorization!, out string accessTokenAud);
+        var errorResponse = HandleAuthentication(authorization, out string accessTokenAud);
         if (errorResponse is not null) { return errorResponse; }
 
         try
@@ -184,7 +184,7 @@ public class ServiceController : ControllerBase
         }
     }
 
-    private IActionResult? HandleAuthentication(string authorization, out string accessTokenAud)
+    private IActionResult? HandleAuthentication(string? authorization, out string accessTokenAud)
     {
         if (string.IsNullOrEmpty(authorization))
         {
