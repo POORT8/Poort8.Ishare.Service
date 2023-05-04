@@ -7,7 +7,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
-builder.Services.AddMemoryCache();
+builder.Services.AddLazyCache();
 
 builder.Services.AddIshareCoreServices();
 
