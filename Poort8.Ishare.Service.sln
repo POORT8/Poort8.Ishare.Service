@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Poort8.Ishare.Service", "Poort8.Ishare.Service\Poort8.Ishare.Service.csproj", "{E4CAB4E6-626A-4917-A2E4-E63AD2F6C26F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Poort8.Ishare.Service", "Poort8.Ishare.Service\Poort8.Ishare.Service.csproj", "{E4CAB4E6-626A-4917-A2E4-E63AD2F6C26F}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{9E0B14F6-5193-4E53-8FAB-CCCAD5946841}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Poort8.Ishare.Core", "Poort8.Ishare.Core\Poort8.Ishare.Core\Poort8.Ishare.Core.csproj", "{76F75BD1-71C7-459D-B516-583BA4B2E561}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{9E0B14F6-5193-4E53-8FAB-CCCAD5946841}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E0B14F6-5193-4E53-8FAB-CCCAD5946841}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E0B14F6-5193-4E53-8FAB-CCCAD5946841}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76F75BD1-71C7-459D-B516-583BA4B2E561}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76F75BD1-71C7-459D-B516-583BA4B2E561}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76F75BD1-71C7-459D-B516-583BA4B2E561}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76F75BD1-71C7-459D-B516-583BA4B2E561}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
